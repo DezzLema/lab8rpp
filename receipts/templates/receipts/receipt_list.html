@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список чеков</title>
+</head>
+<body>
+    <h1>Список чеков</h1>
+    <ul>
+        {% for receipt in receipts %}
+            <li>
+                <a href="{% url 'receipt_detail' pk=receipt.pk %}">
+                    Чек №{{ receipt.number }} ({{ receipt.date_time }})
+                </a>
+                | <a href="{% url 'receipt_update' pk=receipt.pk %}">Редактировать</a>
+                | <a href="{% url 'receipt_delete' pk=receipt.pk %}">Удалить</a>
+            </li>
+        {% empty %}
+            <li>Чеков пока нет.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'receipt_create' %}">Добавить новый чек</a>
+</body>
+</html>

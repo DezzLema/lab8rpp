@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чек №{{ receipt.number }}</title>
+</head>
+<body>
+    <h1>Чек №{{ receipt.number }}</h1>
+    <p><strong>Дата и время:</strong> {{ receipt.date_time }}</p>
+    <p><strong>Сумма:</strong> {{ receipt.total_amount }}</p>
+    <p><strong>Магазин:</strong> {{ receipt.store.name }}</p>
+    <p><strong>Покупатель:</strong> {{ receipt.customer.name }}</p>
+    
+    <h3>Товары:</h3>
+    <ul>
+        {% for item in receipt.receiptproduct_set.all %}
+            <li>{{ item.product.name }} ({{ item.quantity }} шт.)</li>
+        {% empty %}
+            <li>Товары не указаны.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'receipt_list' %}">Назад к списку</a>
+    <a href="{% url 'receipt_update' pk=receipt.pk %}">Редактировать</a>
+</body>
+</html>

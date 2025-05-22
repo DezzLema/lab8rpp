@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Удалить чек №{{ receipt.number }}?</title>
+</head>
+<body>
+    <h1>Удалить чек №{{ receipt.number }}?</h1>
+    <p>Дата: {{ receipt.date_time }}</p>
+    <p>Сумма: {{ receipt.total_amount }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Да, удалить</button>
+    </form>
+    <a href="{% url 'receipt_detail' pk=receipt.pk %}">Отмена</a>
+</body>
+</html>

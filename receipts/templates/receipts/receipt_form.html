@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if form.instance.pk %}Редактировать чек{% else %}Создать чек{% endif %}</title>
+</head>
+<body>
+    <h1>{% if form.instance.pk %}Редактировать чек{% else %}Создать чек{% endif %}</h1>
+    <form method="post" id="receipt-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    
+    <h3>Товары:</h3>
+    {{ formset.management_form }}
+    <div id="products-form-container">
+        {% for form in formset %}
+            <div class="product-form">
+                {{ form.as_p }}
+            </div>
+        {% endfor %}
+    </div>
+    
+    <button type="button" id="add-product" class="btn btn-secondary">Добавить товар</button>
+    <button type="submit" class="btn btn-primary">Сохранить чек</button>
+</form>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('products-form-container');
+    const addButton = document.getElementById('add-product');
+    const totalForms = document.getElementById('id_products-TOTAL_FORMS');
+    let formCount = parseInt(totalForms.value);
+    
+    addButton.addEventListener('click', function() {
+        const newForm = document.createElement('div');
+        newForm.classList.add('product-form');
+        newForm.innerHTML = `
+            <p>
+                <label for="id_products-${formCount}-product">Товар:</label>
+                <select name="products-${formCount}-product" id="id_products-${formCount}-product" class="product-select">
+                    {% for product in products %}
+                        <option value="{{ product.id }}">{{ product.name }}</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>
+                <label for="id_products-${formCount}-quantity">Количество:</label>
+                <input type="number" name="products-${formCount}-quantity" value="1" min="1" id="id_products-${formCount}-quantity">
+            </p>
+            <p>
+                <input type="hidden" name="products-${formCount}-id" id="id_products-${formCount}-id">
+                <input type="checkbox" name="products-${formCount}-DELETE" id="id_products-${formCount}-DELETE">
+                <label for="id_products-${formCount}-DELETE">Удалить</label>
+            </p>
+        `;
+        container.appendChild(newForm);
+        formCount++;
+        totalForms.value = formCount;
+    });
+});
+</script>
+
+    <a href="{% url 'receipt_list' %}">Отмена</a>
+</body>
+</html>
+
