@@ -21,3 +21,190 @@
     </form>
 </div>
 {% endblock %}
+
+<style>
+    /* Основные переменные */
+:root {
+  --primary: #4361ee;
+  --secondary: #3a0ca3;
+  --success: #4cc9f0;
+  --danger: #f72585;
+  --warning: #f8961e;
+  --info: #4895ef;
+  --light: #f8f9fa;
+  --dark: #212529;
+  --gray: #6c757d;
+  --border-radius: 8px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --transition: all 0.2s ease;
+}
+
+/* Общие стили */
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: #f5f7fb;
+  color: var(--dark);
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+h1 {
+  color: var(--dark);
+  font-weight: 600;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Форма */
+form {
+  margin-top: 20px;
+}
+
+.mb-3 {
+  margin-bottom: 1.5rem;
+}
+
+/* Стилизация полей формы */
+form p {
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+/* Кнопки */
+.d-flex {
+  display: flex;
+  gap: 15px;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: var(--transition);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  gap: 0.5rem;
+}
+
+.btn-success {
+  background-color: var(--success);
+  color: var(--dark);
+}
+
+.btn-success:hover {
+  background-color: #3aa8d8;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-secondary {
+  background-color: var(--gray);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5c636a;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Иконки */
+.bi {
+  font-size: 1.1rem;
+}
+
+/* Ошибки валидации */
+.errorlist {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  .d-flex {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+form {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+</style>

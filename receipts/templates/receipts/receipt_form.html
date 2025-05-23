@@ -63,3 +63,191 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html>
 
+<style>/* Основные стили */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --border-color: #ddd;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Заголовок */
+h1 {
+    color: var(--dark-color);
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+    font-size: 2rem;
+}
+
+/* Информация о чеке */
+p {
+    margin: 12px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+p strong {
+    color: var(--dark-color);
+    min-width: 180px;
+    display: inline-block;
+}
+
+/* Список товаров */
+h3 {
+    color: var(--dark-color);
+    margin: 25px 0 15px;
+    font-size: 1.5rem;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 0 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+li {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+}
+
+li:last-child {
+    border-bottom: none;
+}
+
+li:hover {
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* Кнопки */
+div {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+/* Стили для разных кнопок */
+a[href*="update"] {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+a[href*="delete"] {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+a[href*="list"] {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Эффекты при наведении */
+a[href*="update"]:hover {
+    background-color: #e67e22;
+}
+
+a[href*="delete"]:hover {
+    background-color: #c0392b;
+}
+
+a[href*="list"]:hover {
+    background-color: #2980b9;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+p, h3, ul, div {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+p:nth-child(1) { animation-delay: 0.1s; }
+p:nth-child(2) { animation-delay: 0.2s; }
+p:nth-child(3) { animation-delay: 0.3s; }
+p:nth-child(4) { animation-delay: 0.4s; }
+p:nth-child(5) { animation-delay: 0.5s; }
+p:nth-child(6) { animation-delay: 0.6s; }
+p:nth-child(7) { animation-delay: 0.7s; }
+h3 { animation-delay: 0.8s; }
+ul { animation-delay: 0.9s; }
+div { animation-delay: 1s; }
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 1.6rem;
+    }
+    
+    p strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    li {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    div {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Дополнительные эффекты */
+.button {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}</style>

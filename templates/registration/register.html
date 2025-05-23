@@ -1,10 +1,138 @@
-
 {% block content %}
-<h1>Регистрация</h1>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="button">Зарегистрироваться</button>
 </form>
-<p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
 {% endblock %}
+
+<style>
+    /* Основные стили */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Контейнер формы */
+.container {
+    max-width: 500px;
+    width: 100%;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок */
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Форма */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+form p {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+input {
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Кнопка */
+.button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.5rem;
+}
+
+.button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Ссылка */
+p {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #7f8c8d;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Ошибки */
+.errorlist {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+    padding-left: 0;
+    list-style: none;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .container {
+        padding: 1.5rem;
+        margin: 1rem;
+        box-shadow: none;
+    }
+    
+    h1 {
+        font-size: 1.7rem;
+    }
+    
+    input, .button {
+        padding: 0.7rem;
+    }
+}
+</style>
