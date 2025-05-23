@@ -22,6 +22,7 @@ urlpatterns = [
     path('<int:pk>/delete/', views.receipt_delete, name='receipt_delete'),
 
     # Новые URL для других сущностей
+    path('stores/<int:pk>/', views.store_detail, name='store_form'),
     path('employees/', admin_required(views.employee_list), name='employee_list'),
     path('stores/', views.store_list, name='store_list'),
     path('stores/new/', views.store_create, name='store_create'),

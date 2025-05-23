@@ -10,7 +10,7 @@
             <h1 class="d-inline-block mb-0"><i class="bi bi-shop"></i> Список магазинов</h1>
         </div>
         
-        {% if user.role == 'admin' or 'manager' %}
+        {% if user.role != 'cashier'%}
         <div>
             <a href="{% url 'store_create' %}" class="btn btn-success">
                 <i class="bi bi-plus-lg"></i> Добавить магазин
@@ -34,7 +34,7 @@
                     <th>ID</th>
                     <th>Название</th>
                     <th>Адрес</th>
-                    {% if user.role == 'admin' or 'manager' %}
+                    {% if user.role != 'cashier'%}
                     <th class="text-end">Действия</th>
                     {% endif %}
                 </tr>
@@ -46,7 +46,7 @@
                     <td>{{ store.name }}</td>
                     <td>{{ store.address }}</td>
                     <td>{{ store.created_at|date:"d.m.Y H:i" }}</td>
-                    {% if user.role == 'admin' or 'manager' %}
+                    {% if user.role != 'cashier'%}
                     <td class="text-end">
                         <div class="btn-group" role="group">
                             <a href="{% url 'store_update' pk=store.pk %}" class="btn btn-sm btn-outline-warning">

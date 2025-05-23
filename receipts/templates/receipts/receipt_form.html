@@ -1,26 +1,28 @@
-
-{% block content %}
-<h1>{% if form.instance.pk %}Редактирование чека №{{ form.instance.number }}{% else %}Создание нового чека{% endif %}</h1>
-
-<form method="post">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if form.instance.pk %}Редактировать чек{% else %}Создать чек{% endif %}</title>
+</head>
+<body>
+    <h1>{% if form.instance.pk %}Редактировать чек{% else %}Создать чек{% endif %}</h1>
+    <form method="post" id="receipt-form">
     {% csrf_token %}
     {{ form.as_p }}
     
-    <h3>Товары в чеке:</h3>
+    <h3>Товары:</h3>
     {{ formset.management_form }}
-    <table class="table">
+    <div id="products-form-container">
         {% for form in formset %}
-        <tr>
-            <td>{{ form.product }}</td>
-            <td>{{ form.quantity }}</td>
-            <td>{% if form.instance.pk %}{{ form.DELETE }}{% endif %}</td>
-        </tr>
+            <div class="product-form">
+                {{ form.as_p }}
+            </div>
         {% endfor %}
-    </table>
+    </div>
     
-    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <button type="button" id="add-product" class="btn btn-secondary">Добавить товар</button>
+    <button type="submit" class="btn btn-primary">Сохранить чек</button>
 </form>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('products-form-container');
@@ -34,9 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
         newForm.innerHTML = `
             <p>
                 <label for="id_products-${formCount}-product">Товар:</label>
-                <select name="products-${formCount}-product" id="id_products-${formCount}-product">
+                <select name="products-${formCount}-product" id="id_products-${formCount}-product" class="product-select">
                     {% for product in products %}
-                        <option value="{{ product.id }}">{{ product.name }} ({{ product.price }})</option>
+                        <option value="{{ product.id }}">{{ product.name }}</option>
                     {% endfor %}
                 </select>
             </p>
@@ -56,4 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-{% endblock %}
+
+    <a href="{% url 'receipt_list' %}">Отмена</a>
+</body>
+</html>
+

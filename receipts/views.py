@@ -78,7 +78,11 @@ def receipt_list(request):
         receipts = Receipt.objects.filter(cashier=request.user)
     else:
         receipts = Receipt.objects.all()
-    return render(request, 'receipts/receipt_list.html', {'receipts': receipts})
+
+    return render(request, 'receipts/receipt_list.html', {
+        'receipts': receipts,
+        'can_create': request.user.role in ['cashier', 'manager', 'admin']
+    })
 
 
 # Добавим аналогичные представления для всех сущностей
@@ -185,7 +189,7 @@ def store_update(request, pk):
         form = StoreForm(request.POST, instance=store)
         if form.is_valid():
             form.save()
-            return redirect('store_detail', pk=store.pk)
+            return redirect('store_list')
     else:
         form = StoreForm(instance=store)
     return render(request, 'receipts/store_form.html', {'form': form})

@@ -6,10 +6,14 @@
         <h1>Список чеков</h1>
         <div class="btn-group">
             {% if user.is_authenticated %}
-                <a href="{% if user.is_authenticated %}{% url 'store_list' %}{% else %}{% url 'login' %}?next={% url 'store_list' %}{% endif %}" 
-                    class="btn btn-outline-info">
+                <a href="{% url 'store_list' %}" class="btn btn-outline-info">
                     <i class="bi bi-shop"></i> Магазины
                 </a>
+                {% if user.role == 'admin' %}
+                <a href="{% url 'employee_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-people-fill"></i> Работники
+                </a>
+                {% endif %}
                 <form action="{% url 'logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-danger">
@@ -19,13 +23,6 @@
                 <span class="btn btn-outline-secondary disabled">
                     <i class="bi bi-person-fill"></i> {{ user.username }} ({{ user.get_role_display }})
                 </span>
-                
-                {% if user.role == 'admin' %}
-            <a href="{% url 'employee_list' %}" class="btn btn-outline-primary">
-                <i class="bi bi-people-fill"></i> Работники
-            </a>
-            {% endif %}
-
             {% else %}
                 <a href="{% url 'login' %}" class="btn btn-outline-primary">
                     <i class="bi bi-box-arrow-in-right"></i> Войти
@@ -59,7 +56,7 @@
                 <td>
                     <div class="btn-group" role="group">
                         <a href="{% url 'receipt_detail' pk=receipt.pk %}" class="btn btn-sm btn-outline-primary">Просмотр</a>
-                        {% if user.role == 'manager' or receipt.cashier == user %}
+                        {% if user.role == 'manager' or user.role == 'admin' or receipt.cashier == user %}
                             <a href="{% url 'receipt_update' pk=receipt.pk %}" class="btn btn-sm btn-outline-warning">Редактировать</a>
                             <a href="{% url 'receipt_delete' pk=receipt.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
                         {% endif %}
@@ -73,6 +70,9 @@
             {% endfor %}
         </tbody>
     </table>
+    
+    {% if can_create %}
     <a href="{% url 'receipt_create' %}" class="btn btn-primary">Добавить новый чек</a>
+    {% endif %}
 </div>
 {% endblock %}
