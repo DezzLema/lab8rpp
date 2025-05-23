@@ -1,26 +1,29 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Чек №{{ receipt.number }}</title>
-</head>
-<body>
-    <h1>Чек №{{ receipt.number }}</h1>
-    <p><strong>Дата и время:</strong> {{ receipt.date_time }}</p>
-    <p><strong>Сумма:</strong> {{ receipt.total_amount }}</p>
-    <p><strong>Магазин:</strong> {{ receipt.store.name }}</p>
-    <p><strong>Покупатель:</strong> {{ receipt.customer.name }}</p>
-    
-    <h3>Товары:</h3>
-    <ul>
-        {% for item in receipt.receiptproduct_set.all %}
-            <li>{{ item.product.name }} ({{ item.quantity }} шт.)</li>
-        {% empty %}
-            <li>Товары не указаны.</li>
-        {% endfor %}
-    </ul>
 
-    <a href="{% url 'receipt_list' %}">Назад к списку</a>
-    <a href="{% url 'receipt_update' pk=receipt.pk %}">Редактировать</a>
-</body>
-</html>
+
+{% block title %}Чек №{{ receipt.number }}{% endblock %}
+
+{% block content %}
+<h1>Чек №{{ receipt.number }}</h1>
+<p><strong>Дата и время:</strong> {{ receipt.date_time }}</p>
+<p><strong>Сумма:</strong> {{ receipt.total_amount }}</p>
+<p><strong>Магазин:</strong> {{ receipt.store.name }}</p>
+<p><strong>Адрес магазина:</strong> {{ receipt.store.address }}</p>
+<p><strong>Клиент:</strong> {{ receipt.customer.name }}</p>
+<p><strong>Телефон клиента:</strong> {{ receipt.customer.phone }}</p>
+<p><strong>Кассир:</strong> {{ receipt.cashier.username }}</p>
+
+<h3>Товары:</h3>
+<ul>
+    {% for item in receipt.receiptproduct_set.all %}
+    <li>{{ item.product.name }} - {{ item.quantity }} шт. × {{ item.product.price }} = {% widthratio item.product.price 1 item.quantity %}</li>
+    {% endfor %}
+</ul>
+
+<div>
+    {% if user.role == 'manager' or receipt.cashier == user %}
+        <a href="{% url 'receipt_update' pk=receipt.pk %}" class="button">Редактировать</a>
+        <a href="{% url 'receipt_delete' pk=receipt.pk %}" class="button">Удалить</a>
+    {% endif %}
+    <a href="{% url 'receipt_list' %}" class="button">Назад к списку</a>
+</div>
+{% endblock %}

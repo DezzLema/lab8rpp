@@ -1,5 +1,36 @@
 from django import forms
-from .models import Receipt, ReceiptProduct, Product
+from .models import *
+from django.contrib.auth.forms import UserCreationForm
+
+
+class StoreForm(forms.ModelForm):
+    class Meta:
+        model = Store
+        fields = '__all__'
+
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+
+class ProductCategoryForm(forms.ModelForm):
+    class Meta:
+        model = ProductCategory
+        fields = '__all__'
+
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = CustomUser
+        fields = UserCreationForm.Meta.fields + ('role',)
 
 
 class ReceiptProductForm(forms.ModelForm):
@@ -28,9 +59,10 @@ ReceiptProductFormSet = forms.inlineformset_factory(
 class ReceiptForm(forms.ModelForm):
     class Meta:
         model = Receipt
-        fields = ['number', 'date_time', 'store', 'customer']
+        fields = ['number', 'date_time', 'store', 'customer', 'cashier']
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.product_formset = ReceiptProductFormSet(
             instance=self.instance,
@@ -38,6 +70,9 @@ class ReceiptForm(forms.ModelForm):
             files=self.files if self.is_bound else None,
             prefix='products'
         )
+        if user:
+            self.fields['cashier'].initial = user
+            self.fields['cashier'].disabled = True  # Чтобы нельзя было изменить кассира
 
     def is_valid(self):
         return super().is_valid() and self.product_formset.is_valid()

@@ -3,9 +3,13 @@ from django.views.generic import CreateView, UpdateView
 from django.forms import inlineformset_factory
 from .models import Receipt, ReceiptProduct, Product
 from .forms import ReceiptForm, ReceiptProductForm
-from .models import Receipt
-from .forms import ReceiptForm, ReceiptProductFormSet
+from .models import *
+from .forms import *
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.contrib.auth.views import LogoutView
 
 ReceiptProductFormSet = inlineformset_factory(
     Receipt,
@@ -16,55 +20,158 @@ ReceiptProductFormSet = inlineformset_factory(
 )
 
 
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('receipt_list')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+
+def is_manager(user):
+    return user.role == 'manager'
+
+
+def is_cashier(user):
+    return user.role == 'cashier'
+
+
+@login_required
 def receipt_list(request):
-    receipts = Receipt.objects.all()
+    if request.user.role == 'cashier':
+        receipts = Receipt.objects.filter(cashier=request.user)
+    else:
+        receipts = Receipt.objects.all()
     return render(request, 'receipts/receipt_list.html', {'receipts': receipts})
 
 
+# Добавим аналогичные представления для всех сущностей
+@login_required
+@user_passes_test(is_manager)
+def store_list(request):
+    stores = Store.objects.all()
+    return render(request, 'receipts/store_list.html', {'stores': stores})
+
+
+@login_required
 def receipt_detail(request, pk):
     receipt = get_object_or_404(Receipt, pk=pk)
+    # Кассир может видеть только свои чеки
+    if request.user.role == 'cashier' and receipt.cashier != request.user:
+        return redirect('receipt_list')
     return render(request, 'receipts/receipt_detail.html', {'receipt': receipt})
 
 
+@login_required
 def receipt_create(request):
-    products = Product.objects.all()  # Получаем все товары для выпадающего списка
-
     if request.method == 'POST':
-        form = ReceiptForm(request.POST)
+        form = ReceiptForm(request.POST, user=request.user)
         if form.is_valid():
-            receipt = form.save()
+            receipt = form.save(commit=False)
+            receipt.cashier = request.user
+            receipt.save()
+            form.save_m2m()  # Для сохранения many-to-many отношений
             return redirect('receipt_list')
     else:
-        form = ReceiptForm()
+        form = ReceiptForm(user=request.user)
 
     return render(request, 'receipts/receipt_form.html', {
         'form': form,
         'formset': form.product_formset,
-        'products': products  # Добавляем товары в контекст
+        'products': Product.objects.all()
     })
 
+
+@login_required
+@user_passes_test(is_manager)
+def store_create(request):
+    if request.method == 'POST':
+        form = StoreForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('store_list')
+    else:
+        form = StoreForm()
+    return render(request, 'receipts/store_form.html', {'form': form})
+
+
+@login_required
 def receipt_update(request, pk):
     receipt = get_object_or_404(Receipt, pk=pk)
+    # Проверка прав доступа
+    if request.user.role == 'cashier' and receipt.cashier != request.user:
+        return redirect('receipt_list')
+
     if request.method == 'POST':
-        form = ReceiptForm(request.POST, instance=receipt)
+        form = ReceiptForm(request.POST, instance=receipt, user=request.user)
         if form.is_valid():
             form.save()
             return redirect('receipt_detail', pk=receipt.pk)
     else:
-        form = ReceiptForm(instance=receipt)
+        form = ReceiptForm(instance=receipt, user=request.user)
 
     return render(request, 'receipts/receipt_form.html', {
         'form': form,
-        'formset': form.product_formset
+        'formset': form.product_formset,
+        'products': Product.objects.all()
     })
 
 
+@login_required
 def receipt_delete(request, pk):
     receipt = get_object_or_404(Receipt, pk=pk)
+    # Проверка прав доступа
+    if request.user.role == 'cashier' and receipt.cashier != request.user:
+        return redirect('receipt_list')
+
     if request.method == 'POST':
         receipt.delete()
         return redirect('receipt_list')
     return render(request, 'receipts/receipt_confirm_delete.html', {'receipt': receipt})
+
+
+# Представления для магазинов (только для менеджеров)
+@login_required
+@user_passes_test(is_manager)
+def store_list(request):
+    stores = Store.objects.all()
+    return render(request, 'receipts/store_list.html', {'stores': stores})
+
+
+@login_required
+@user_passes_test(is_manager)
+def store_detail(request, pk):
+    store = get_object_or_404(Store, pk=pk)
+    return render(request, 'receipts/store_detail.html', {'store': store})
+
+
+@login_required
+@user_passes_test(is_manager)
+def store_update(request, pk):
+    store = get_object_or_404(Store, pk=pk)
+    if request.method == 'POST':
+        form = StoreForm(request.POST, instance=store)
+        if form.is_valid():
+            form.save()
+            return redirect('store_detail', pk=store.pk)
+    else:
+        form = StoreForm(instance=store)
+    return render(request, 'receipts/store_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_manager)
+def store_delete(request, pk):
+    store = get_object_or_404(Store, pk=pk)
+    if request.method == 'POST':
+        store.delete()
+        return redirect('store_list')
+    return render(request, 'receipts/store_confirm_delete.html', {'store': store})
 
 
 class ReceiptCreateView(CreateView):
@@ -98,3 +205,159 @@ class ReceiptUpdateView(UpdateView):
             return super().form_valid(form)
         else:
             return self.render_to_response(self.get_context_data(form=form))
+
+
+# Представления для клиентов (только для менеджеров)
+@login_required
+@user_passes_test(is_manager)
+def customer_list(request):
+    customers = Customer.objects.all()
+    return render(request, 'receipts/customer_list.html', {'customers': customers})
+
+
+@login_required
+@user_passes_test(is_manager)
+def customer_detail(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    return render(request, 'receipts/customer_detail.html', {'customer': customer})
+
+
+@login_required
+@user_passes_test(is_manager)
+def customer_create(request):
+    if request.method == 'POST':
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('customer_list')
+    else:
+        form = CustomerForm()
+    return render(request, 'receipts/customer_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_manager)
+def customer_update(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, instance=customer)
+        if form.is_valid():
+            form.save()
+            return redirect('customer_detail', pk=customer.pk)
+    else:
+        form = CustomerForm(instance=customer)
+    return render(request, 'receipts/customer_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_manager)
+def customer_delete(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    if request.method == 'POST':
+        customer.delete()
+        return redirect('customer_list')
+    return render(request, 'receipts/customer_confirm_delete.html', {'customer': customer})
+
+
+# Представления для категорий товаров (только для менеджеров)
+@login_required
+@user_passes_test(is_manager)
+def category_list(request):
+    categories = ProductCategory.objects.all()
+    return render(request, 'receipts/category_list.html', {'categories': categories})
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_detail(request, pk):
+    category = get_object_or_404(ProductCategory, pk=pk)
+    return render(request, 'receipts/category_detail.html', {'category': category})
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_create(request):
+    if request.method == 'POST':
+        form = ProductCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('category_list')
+    else:
+        form = ProductCategoryForm()
+    return render(request, 'receipts/category_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_update(request, pk):
+    category = get_object_or_404(ProductCategory, pk=pk)
+    if request.method == 'POST':
+        form = ProductCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('category_detail', pk=category.pk)
+    else:
+        form = ProductCategoryForm(instance=category)
+    return render(request, 'receipts/category_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_manager)
+def category_delete(request, pk):
+    category = get_object_or_404(ProductCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        return redirect('category_list')
+    return render(request, 'receipts/category_confirm_delete.html', {'category': category})
+
+
+# Представления для товаров (только для менеджеров)
+@login_required
+@user_passes_test(is_manager)
+def product_list(request):
+    products = Product.objects.all()
+    return render(request, 'receipts/product_list.html', {'products': products})
+
+
+@login_required
+@user_passes_test(is_manager)
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'receipts/product_detail.html', {'product': product})
+
+
+@login_required
+@user_passes_test(is_manager)
+def product_create(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')
+    else:
+        form = ProductForm()
+    return render(request, 'receipts/product_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_manager)
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('product_detail', pk=product.pk)
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'receipts/product_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_manager)
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        product.delete()
+        return redirect('product_list')
+    return render(request, 'receipts/product_confirm_delete.html', {'product': product})

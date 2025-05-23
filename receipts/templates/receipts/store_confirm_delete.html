@@ -1,0 +1,14 @@
+
+
+{% block title %}Удаление магазина {{ store.name }}{% endblock %}
+
+{% block content %}
+<h1>Удалить магазин "{{ store.name }}"?</h1>
+<p><strong>Адрес:</strong> {{ store.address }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="button">Да, удалить</button>
+    <a href="{% url 'store_detail' pk=store.pk %}" class="button">Отмена</a>
+</form>
+{% endblock %}
