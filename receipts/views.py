@@ -10,6 +10,10 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied
 
 ReceiptProductFormSet = inlineformset_factory(
     Receipt,
@@ -19,6 +23,33 @@ ReceiptProductFormSet = inlineformset_factory(
     can_delete=True
 )
 
+
+def is_manager_or_admin(user):
+    return user.role in ['manager', 'admin']
+
+
+def manager_or_admin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        if request.user.role not in ['manager', 'admin']:
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+@login_required
+def store_list(request):
+    stores = Store.objects.all()
+    # Проверяем, может ли пользователь редактировать (только менеджеры и админы)
+    can_edit = request.user.role in ['manager', 'admin']
+
+    return render(request, 'receipts/store_list.html', {
+        'stores': stores,
+        'can_edit': can_edit,
+        'is_cashier': request.user.role == 'cashier'
+    })
 
 
 def register(request):
@@ -52,7 +83,6 @@ def receipt_list(request):
 
 # Добавим аналогичные представления для всех сущностей
 @login_required
-@user_passes_test(is_manager)
 def store_list(request):
     stores = Store.objects.all()
     return render(request, 'receipts/store_list.html', {'stores': stores})
@@ -69,26 +99,25 @@ def receipt_detail(request, pk):
 
 @login_required
 def receipt_create(request):
+    products = Product.objects.all()  # Получаем все товары для выпадающего списка
+
     if request.method == 'POST':
-        form = ReceiptForm(request.POST, user=request.user)
+        form = ReceiptForm(request.POST)
         if form.is_valid():
-            receipt = form.save(commit=False)
-            receipt.cashier = request.user
-            receipt.save()
-            form.save_m2m()  # Для сохранения many-to-many отношений
+            receipt = form.save()
             return redirect('receipt_list')
     else:
-        form = ReceiptForm(user=request.user)
+        form = ReceiptForm()
 
     return render(request, 'receipts/receipt_form.html', {
         'form': form,
         'formset': form.product_formset,
-        'products': Product.objects.all()
+        'products': products  # Добавляем товары в контекст
     })
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def store_create(request):
     if request.method == 'POST':
         form = StoreForm(request.POST)
@@ -126,7 +155,7 @@ def receipt_update(request, pk):
 def receipt_delete(request, pk):
     receipt = get_object_or_404(Receipt, pk=pk)
     # Проверка прав доступа
-    if request.user.role == 'cashier' and receipt.cashier != request.user:
+    if request.user.role == 'cashier':
         return redirect('receipt_list')
 
     if request.method == 'POST':
@@ -137,21 +166,19 @@ def receipt_delete(request, pk):
 
 # Представления для магазинов (только для менеджеров)
 @login_required
-@user_passes_test(is_manager)
 def store_list(request):
     stores = Store.objects.all()
     return render(request, 'receipts/store_list.html', {'stores': stores})
 
 
 @login_required
-@user_passes_test(is_manager)
 def store_detail(request, pk):
     store = get_object_or_404(Store, pk=pk)
     return render(request, 'receipts/store_detail.html', {'store': store})
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def store_update(request, pk):
     store = get_object_or_404(Store, pk=pk)
     if request.method == 'POST':
@@ -165,7 +192,7 @@ def store_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def store_delete(request, pk):
     store = get_object_or_404(Store, pk=pk)
     if request.method == 'POST':
@@ -209,21 +236,18 @@ class ReceiptUpdateView(UpdateView):
 
 # Представления для клиентов (только для менеджеров)
 @login_required
-@user_passes_test(is_manager)
 def customer_list(request):
     customers = Customer.objects.all()
     return render(request, 'receipts/customer_list.html', {'customers': customers})
 
 
 @login_required
-@user_passes_test(is_manager)
 def customer_detail(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     return render(request, 'receipts/customer_detail.html', {'customer': customer})
 
 
 @login_required
-@user_passes_test(is_manager)
 def customer_create(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
@@ -236,7 +260,7 @@ def customer_create(request):
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def customer_update(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
@@ -250,7 +274,7 @@ def customer_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def customer_delete(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
@@ -261,21 +285,19 @@ def customer_delete(request, pk):
 
 # Представления для категорий товаров (только для менеджеров)
 @login_required
-@user_passes_test(is_manager)
 def category_list(request):
     categories = ProductCategory.objects.all()
     return render(request, 'receipts/category_list.html', {'categories': categories})
 
 
 @login_required
-@user_passes_test(is_manager)
 def category_detail(request, pk):
     category = get_object_or_404(ProductCategory, pk=pk)
     return render(request, 'receipts/category_detail.html', {'category': category})
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def category_create(request):
     if request.method == 'POST':
         form = ProductCategoryForm(request.POST)
@@ -288,7 +310,7 @@ def category_create(request):
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def category_update(request, pk):
     category = get_object_or_404(ProductCategory, pk=pk)
     if request.method == 'POST':
@@ -302,7 +324,7 @@ def category_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_manager)
+@manager_or_admin_required
 def category_delete(request, pk):
     category = get_object_or_404(ProductCategory, pk=pk)
     if request.method == 'POST':
@@ -313,21 +335,18 @@ def category_delete(request, pk):
 
 # Представления для товаров (только для менеджеров)
 @login_required
-@user_passes_test(is_manager)
 def product_list(request):
     products = Product.objects.all()
     return render(request, 'receipts/product_list.html', {'products': products})
 
 
 @login_required
-@user_passes_test(is_manager)
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     return render(request, 'receipts/product_detail.html', {'product': product})
 
 
 @login_required
-@user_passes_test(is_manager)
 def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
@@ -340,7 +359,6 @@ def product_create(request):
 
 
 @login_required
-@user_passes_test(is_manager)
 def product_update(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
@@ -354,10 +372,20 @@ def product_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_manager)
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
         product.delete()
         return redirect('product_list')
     return render(request, 'receipts/product_confirm_delete.html', {'product': product})
+
+
+@login_required
+def employee_list(request):
+    if request.user.role != 'admin':
+        raise PermissionDenied
+
+    employees = CustomUser.objects.all().order_by('role', 'username')
+    return render(request, 'receipts/employee_list.html', {
+        'employees': employees
+    })

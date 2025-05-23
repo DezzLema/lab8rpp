@@ -127,6 +127,6 @@ AUTH_USER_MODEL = 'receipts.CustomUser'
 LOGIN_REDIRECT_URL = '/receipts/'
 
 LOGOUT_REDIRECT_URL = 'login'  # Перенаправит на страницу входа
-LOGIN_URL = 'login'  # URL для входа
+LOGIN_URL = '/receipts/accounts/login/'  # URL для входа
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

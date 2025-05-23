@@ -3,13 +3,16 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
 
-
 class CustomUser(AbstractUser):
     ROLES = (
         ('cashier', 'Кассир'),
         ('manager', 'Менеджер'),
+        ('admin', 'Администратор'),
     )
     role = models.CharField(max_length=10, choices=ROLES, default='cashier')
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}".strip() or self.username
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -24,14 +27,12 @@ class CustomUser(AbstractUser):
         return dict(self.ROLES).get(self.role, self.role)
 
 
-
 class Store(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
-
 
 
 class Customer(models.Model):

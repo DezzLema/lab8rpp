@@ -1,5 +1,18 @@
 from django.urls import path, include
 from . import views
+from django.contrib.auth.decorators import user_passes_test
+
+
+def admin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role != 'admin':
+            from django.contrib.auth.views import redirect_to_login
+            from django.urls import reverse
+            return redirect_to_login(reverse('employee_list'))
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
 
 urlpatterns = [
     path('', views.receipt_list, name='receipt_list'),
@@ -9,6 +22,11 @@ urlpatterns = [
     path('<int:pk>/delete/', views.receipt_delete, name='receipt_delete'),
 
     # Новые URL для других сущностей
+    path('employees/', admin_required(views.employee_list), name='employee_list'),
+    path('stores/', views.store_list, name='store_list'),
+    path('stores/new/', views.store_create, name='store_create'),
+    path('stores/<int:pk>/edit/', views.store_update, name='store_update'),
+    path('stores/<int:pk>/delete/', views.store_delete, name='store_delete'),
     path('stores/', views.store_list, name='store_list'),
     path('stores/new/', views.store_create, name='store_create'),
     path('stores/<int:pk>/edit/', views.store_update, name='store_update'),

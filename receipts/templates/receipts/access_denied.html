@@ -1,0 +1,11 @@
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-danger">
+        <h4><i class="bi bi-exclamation-triangle-fill"></i> Доступ запрещен</h4>
+        <p>У вас (роль: {{ user.get_role_display }}) нет прав для просмотра этой страницы.</p>
+        <a href="{% url 'receipt_list' %}" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Вернуться к главной
+        </a>
+    </div>
+</div>
+{% endblock %}

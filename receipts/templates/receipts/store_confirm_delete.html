@@ -1,14 +1,27 @@
 
 
-{% block title %}Удаление магазина {{ store.name }}{% endblock %}
-
 {% block content %}
-<h1>Удалить магазин "{{ store.name }}"?</h1>
-<p><strong>Адрес:</strong> {{ store.address }}</p>
-
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" class="button">Да, удалить</button>
-    <a href="{% url 'store_detail' pk=store.pk %}" class="button">Отмена</a>
-</form>
+<div class="container mt-4">
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <h3><i class="bi bi-exclamation-triangle-fill"></i> Подтверждение удаления</h3>
+        </div>
+        <div class="card-body">
+            <p class="lead">Вы уверены, что хотите удалить магазин "{{ store.name }}"?</p>
+            <p>Адрес: {{ store.address }}</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash-fill"></i> Удалить
+                    </button>
+                    <a href="{% url 'store_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,27 +1,24 @@
 
-
-{% block title %}{% if form.instance.pk %}Редактирование чека №{{ form.instance.number }}{% else %}Создание нового чека{% endif %}{% endblock %}
-
 {% block content %}
 <h1>{% if form.instance.pk %}Редактирование чека №{{ form.instance.number }}{% else %}Создание нового чека{% endif %}</h1>
 
-<form method="post" id="receipt-form">
+<form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     
-    <h3>Товары:</h3>
+    <h3>Товары в чеке:</h3>
     {{ formset.management_form }}
-    <div id="products-form-container">
+    <table class="table">
         {% for form in formset %}
-            <div class="product-form">
-                {{ form.as_p }}
-            </div>
+        <tr>
+            <td>{{ form.product }}</td>
+            <td>{{ form.quantity }}</td>
+            <td>{% if form.instance.pk %}{{ form.DELETE }}{% endif %}</td>
+        </tr>
         {% endfor %}
-    </div>
+    </table>
     
-    <button type="button" id="add-product" class="button">Добавить товар</button>
-    <button type="submit" class="button">Сохранить</button>
-    <a href="{% if form.instance.pk %}{% url 'receipt_detail' pk=form.instance.pk %}{% else %}{% url 'receipt_list' %}{% endif %}" class="button">Отмена</a>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
 </form>
 
 <script>

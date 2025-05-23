@@ -1,14 +1,23 @@
 
 
-{% block title %}{% if form.instance.pk %}Редактирование магазина {{ form.instance.name }}{% else %}Добавление магазина{% endif %}{% endblock %}
-
 {% block content %}
-<h1>{% if form.instance.pk %}Редактирование магазина {{ form.instance.name }}{% else %}Добавление магазина{% endif %}</h1>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="button">Сохранить</button>
-    <a href="{% if form.instance.pk %}{% url 'store_detail' pk=form.instance.pk %}{% else %}{% url 'store_list' %}{% endif %}" class="button">Отмена</a>
-</form>
+<div class="container mt-4">
+    <h1>{% if object %}Редактирование{% else %}Создание{% endif %} магазина</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-lg"></i> Сохранить
+            </button>
+            <a href="{% url 'store_list' %}" class="btn btn-secondary">
+                <i class="bi bi-x-lg"></i> Отмена
+            </a>
+        </div>
+    </form>
+</div>
 {% endblock %}
